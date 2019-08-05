@@ -1,0 +1,5 @@
+{
+  "timestamp": "2019-08-04T21:24:17.334Z",
+  "message": "could not found account with provided id: 1",
+  "details": "/accounts/1"
+}
