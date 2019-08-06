@@ -1,0 +1,18 @@
+{
+  "transactions": [
+    {
+      "transactionType": "CREDIT",
+      "timestamp": "2019-08-11T09:05:37.402Z",
+      "amount": 1500.0,
+      "currency": "EURO",
+      "details": "credit transaction"
+    },
+    {
+      "transactionType": "CREDIT",
+      "timestamp": "2019-08-11T09:05:37.476Z",
+      "amount": 500.0,
+      "currency": "EURO",
+      "details": "money transferred from account with id: 1"
+    }
+  ]
+}

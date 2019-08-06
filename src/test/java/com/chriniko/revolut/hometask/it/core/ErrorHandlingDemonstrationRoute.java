@@ -5,8 +5,10 @@ import com.chriniko.revolut.hometask.error.ValidationException;
 import com.chriniko.revolut.hometask.http.RouteDefinition;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.ExceptionHandler;
 import io.undertow.util.Methods;
 
+import javax.validation.Validation;
 import java.time.Clock;
 import java.util.Deque;
 import java.util.Optional;
@@ -14,7 +16,7 @@ import java.util.Optional;
 public class ErrorHandlingDemonstrationRoute extends RouteDefinition {
 
     protected ErrorHandlingDemonstrationRoute() {
-        super(Clock.systemUTC(), new ObjectMapper());
+        super(Clock.systemUTC(), new ObjectMapper(), Validation.buildDefaultValidatorFactory());
     }
 
     @Override
@@ -28,7 +30,7 @@ public class ErrorHandlingDemonstrationRoute extends RouteDefinition {
     }
 
     @Override
-    public HttpHandler httpHandler() {
+    public ExceptionHandler httpHandler() {
         HttpHandler dummyHandler = exchange -> {
 
             String errorType = Optional
@@ -53,8 +55,4 @@ public class ErrorHandlingDemonstrationRoute extends RouteDefinition {
         return super.provideErrorHandling(dummyHandler);
     }
 
-    @Override
-    public boolean isIoTask() {
-        return false;
-    }
 }

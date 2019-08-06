@@ -1,0 +1,5 @@
+{
+  "timestamp": "2019-08-10T04:35:41.015Z",
+  "message": "account has insufficient funds for debit operation",
+  "details": "/accounts/1/debit"
+}

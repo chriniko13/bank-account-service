@@ -1,25 +1,22 @@
 package com.chriniko.revolut.hometask.it.core;
 
-import com.chriniko.revolut.hometask.account.dto.CreateAccountRequest;
-import com.chriniko.revolut.hometask.account.entity.Address;
-import com.chriniko.revolut.hometask.account.entity.Balance;
-import com.chriniko.revolut.hometask.account.entity.Name;
+import com.chriniko.revolut.hometask.account.dto.AddressDto;
+import com.chriniko.revolut.hometask.account.dto.ModifyAccountRequest;
+import com.chriniko.revolut.hometask.account.dto.NameDto;
 import com.github.javafaker.Faker;
-
-import java.math.BigDecimal;
 
 public interface AccountGenerator {
 
-    default CreateAccountRequest createSampleAccountRequest() {
+    default ModifyAccountRequest createSampleAccountRequest() {
 
-        CreateAccountRequest createAccount = new CreateAccountRequest();
+        ModifyAccountRequest createAccount = new ModifyAccountRequest();
 
-        Name name = new Name();
+        NameDto name = new NameDto();
         name.setFirst("John");
         name.setLast("Doe");
         createAccount.setName(name);
 
-        Address address = new Address();
+        AddressDto address = new AddressDto();
         address.setCity("city");
         address.setName("name");
         address.setState("state");
@@ -27,35 +24,26 @@ public interface AccountGenerator {
         address.setZipCode("1234");
         createAccount.setAddress(address);
 
-        Balance balance = new Balance();
-        balance.setAmount(BigDecimal.valueOf(11000.48D));
-
-        createAccount.setBalance(balance);
 
         return createAccount;
     }
 
-    default CreateAccountRequest createSampleAccountRequest(Faker faker) {
+    default ModifyAccountRequest createSampleAccountRequest(Faker faker) {
 
-        CreateAccountRequest createAccount = new CreateAccountRequest();
+        ModifyAccountRequest createAccount = new ModifyAccountRequest();
 
-        Name name = new Name();
+        NameDto name = new NameDto();
         name.setFirst(faker.name().firstName());
         name.setLast(faker.name().lastName());
         createAccount.setName(name);
 
-        Address address = new Address();
+        AddressDto address = new AddressDto();
         address.setCity(faker.address().city());
         address.setName(faker.address().cityName());
         address.setState(faker.address().state());
         address.setStreetAddress(faker.address().streetAddress());
         address.setZipCode(faker.address().zipCode());
         createAccount.setAddress(address);
-
-        Balance balance = new Balance();
-        balance.setAmount(BigDecimal.valueOf(11000.48D));
-
-        createAccount.setBalance(balance);
 
         return createAccount;
     }

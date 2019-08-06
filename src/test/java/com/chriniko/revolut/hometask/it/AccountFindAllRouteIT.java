@@ -1,6 +1,6 @@
 package com.chriniko.revolut.hometask.it;
 
-import com.chriniko.revolut.hometask.account.dto.CreateAccountRequest;
+import com.chriniko.revolut.hometask.account.dto.ModifyAccountRequest;
 import com.chriniko.revolut.hometask.it.core.AccountGenerator;
 import com.chriniko.revolut.hometask.it.core.FileSupport;
 import com.chriniko.revolut.hometask.it.core.SpecificationIT;
@@ -21,7 +21,7 @@ public class AccountFindAllRouteIT extends SpecificationIT implements AccountGen
     public void find_all_normal_case() throws Exception {
 
         // given
-        CreateAccountRequest createAccount = createSampleAccountRequest();
+        ModifyAccountRequest createAccount = createSampleAccountRequest();
         String payload = objectMapper.writeValueAsString(createAccount);
 
         for (int i = 1; i <= 100; i++) {
@@ -30,7 +30,7 @@ public class AccountFindAllRouteIT extends SpecificationIT implements AccountGen
 
             Response createAccountResponse = httpClient.newCall(createAccountRequest).execute();
 
-            assertEquals(200, createAccountResponse.code());
+            assertEquals(201, createAccountResponse.code());
 
             createAccountResponse.close();
         }
@@ -45,7 +45,7 @@ public class AccountFindAllRouteIT extends SpecificationIT implements AccountGen
         assertEquals(200, findAllAccountsResponse.code());
 
         String actual = findAllAccountsResponse.body().string();
-        String expected = FileSupport.read("test/response/account_find_all_normal_case.json");
+        String expected = FileSupport.read("test/response/find/account_find_all_normal_case.json");
 
         JSONAssert.assertEquals(expected, actual,
                 new CustomComparator(

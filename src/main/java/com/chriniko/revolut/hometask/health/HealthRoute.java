@@ -4,12 +4,13 @@ import com.chriniko.revolut.hometask.http.RouteDefinition;
 import com.chriniko.revolut.hometask.time.UtcZone;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.ExceptionHandler;
 import io.undertow.util.Methods;
 import lombok.extern.log4j.Log4j2;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
+import javax.validation.ValidatorFactory;
 import java.time.Clock;
 
 @Log4j2
@@ -18,8 +19,8 @@ import java.time.Clock;
 public class HealthRoute extends RouteDefinition {
 
     @Inject
-    public HealthRoute(@UtcZone Clock clock, ObjectMapper objectMapper) {
-        super(clock, objectMapper);
+    public HealthRoute(@UtcZone Clock clock, ObjectMapper objectMapper, ValidatorFactory validatorFactory) {
+        super(clock, objectMapper, validatorFactory);
     }
 
     @Override
@@ -33,29 +34,15 @@ public class HealthRoute extends RouteDefinition {
     }
 
     @Override
-    public HttpHandler httpHandler() {
-        HttpHandler handler = new HttpHandler() {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws Exception {
-                // Note: dispatch to non-io threads if needed.
-                if (isIoTask() && exchange.isInIoThread()) {
-                    exchange.dispatch(this);
-                    return;
-                }
+    public ExceptionHandler httpHandler() {
 
-                // Note: in worker thread
-                HealthResponse healthResponse = new HealthResponse(HealthResponse.HealthStatus.OK, "service is up and running");
-                String message = objectMapper.writeValueAsString(healthResponse);
-                exchange.getResponseSender().send(message);
-            }
-        };
+        HttpHandler handler = httpHandler(x -> {
+            HealthResponse healthResponse = new HealthResponse(HealthResponse.HealthStatus.OK, "service is up and running");
+            String message = serialize(healthResponse);
+            x.getResponseSender().send(message);
+        });
 
-        return super.provideErrorHandling(handler);
-    }
-
-    @Override
-    public boolean isIoTask() {
-        return false;
+        return provideErrorHandling(handler);
     }
 
 }

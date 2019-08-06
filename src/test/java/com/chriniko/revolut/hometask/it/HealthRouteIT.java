@@ -21,9 +21,9 @@ public class HealthRouteIT extends SpecificationIT {
             // then
             String payloadAsString = response.body().string();
 
-            String expected = FileSupport.read("test/response/health_route_normal_response.json");
+            String expected = FileSupport.read("test/response/health/health_route_normal_response.json");
 
-            JSONAssert.assertEquals(payloadAsString, expected, true);
+            JSONAssert.assertEquals(expected, payloadAsString, true);
         }
     }
 

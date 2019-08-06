@@ -53,13 +53,21 @@ public class HttpEnvironment {
     public void run() {
         undertow.start();
         log.info("http environment up and running at: http://" + serverHost + ":" + serverPort);
+        log.info("health-check at: http://" + serverHost + ":" + serverPort + "/health");
+
     }
 
     private RoutingHandler defineRoutes() {
         RoutingHandler routingHandler = Handlers.routing();
 
         routeDefinitions.forEach(routeDefinition -> {
-            routingHandler.add(routeDefinition.httpMethod(), routeDefinition.url(), routeDefinition.httpHandler());
+            routingHandler.add(
+                    routeDefinition.httpMethod(),
+                    routeDefinition.url(),
+                    routeDefinition.addFallbackErrorHandler(
+                            routeDefinition.httpHandler()
+                    )
+            );
         });
 
         routingHandler.setFallbackHandler(exchange -> {

@@ -1,0 +1,5 @@
+{
+  "timestamp": "2019-08-11T21:05:03.315Z",
+  "message": "Account with id: 1 is under modification, try again later",
+  "details": "/accounts/1/transactions"
+}

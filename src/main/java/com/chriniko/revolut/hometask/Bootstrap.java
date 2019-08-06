@@ -23,10 +23,7 @@ public class Bootstrap {
 
         final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            log.info("will shutdown http environment...");
-            shutdownLatch.countDown();
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(shutdownLatch::countDown));
 
         HttpEnvironment httpEnvironment = httpEnvironmentInstance.get();
         httpEnvironment.run();

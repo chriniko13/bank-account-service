@@ -1,0 +1,21 @@
+{
+  "id": 1,
+  "name": {
+    "first": "John --- updated 1",
+    "initials": "null --- updated 1",
+    "last": "Doe --- updated 1"
+  },
+  "address": {
+    "name": "name --- updated 1",
+    "streetAddress": "street --- updated 1",
+    "city": "city --- updated 1",
+    "state": "state --- updated 1",
+    "zipCode": "1234 --- updated 1"
+  },
+  "balance": {
+    "amount": 0,
+    "currency": "EURO"
+  },
+  "created": "2019-08-06T22:33:24.538689Z",
+  "updated": "2019-08-06T22:33:24.550566Z"
+}

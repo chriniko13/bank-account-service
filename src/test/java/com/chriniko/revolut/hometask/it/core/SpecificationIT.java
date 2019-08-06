@@ -10,6 +10,7 @@ import org.junit.BeforeClass;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.se.SeContainer;
 import javax.enterprise.inject.se.SeContainerInitializer;
+import java.util.concurrent.TimeUnit;
 
 public class SpecificationIT {
 
@@ -45,6 +46,13 @@ public class SpecificationIT {
         accountRepository = container.select(AccountRepository.class).get();
 
         httpClient = new OkHttpClient();
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.connectTimeout(5, TimeUnit.MINUTES)
+                .writeTimeout(5, TimeUnit.MINUTES)
+                .readTimeout(5, TimeUnit.MINUTES);
+
+        httpClient = builder.build();
+
         objectMapper = new ObjectMapper();
     }
 

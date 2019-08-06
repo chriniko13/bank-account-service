@@ -1,0 +1,25 @@
+{
+  "transactions": [
+    {
+      "transactionType": "CREDIT",
+      "timestamp": "2019-08-11T14:58:14.110Z",
+      "amount": 1000.0,
+      "currency": "EURO",
+      "details": "credit transaction"
+    },
+    {
+      "transactionType": "DEBIT",
+      "timestamp": "2019-08-11T14:58:14.116Z",
+      "amount": 100.0,
+      "currency": "EURO",
+      "details": "debit transaction"
+    },
+    {
+      "transactionType": "CREDIT",
+      "timestamp": "2019-08-11T14:58:14.119Z",
+      "amount": 12000,
+      "currency": "EURO",
+      "details": "credit transaction"
+    }
+  ]
+}

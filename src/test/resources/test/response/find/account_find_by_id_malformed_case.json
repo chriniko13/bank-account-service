@@ -1,0 +1,7 @@
+{
+  "timestamp": "2019-08-12T23:30:40.667Z",
+  "messages": [
+    "id should be an integer"
+  ],
+  "details": "/accounts/foobar"
+}

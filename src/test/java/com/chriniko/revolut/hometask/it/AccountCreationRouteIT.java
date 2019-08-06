@@ -1,8 +1,9 @@
 package com.chriniko.revolut.hometask.it;
 
 import com.chriniko.revolut.hometask.account.dto.AccountDto;
-import com.chriniko.revolut.hometask.account.dto.CreateAccountRequest;
 import com.chriniko.revolut.hometask.account.dto.FindAllAccountsResponse;
+import com.chriniko.revolut.hometask.account.dto.ModifyAccountRequest;
+import com.chriniko.revolut.hometask.error.ErrorDetails;
 import com.chriniko.revolut.hometask.it.core.AccountGenerator;
 import com.chriniko.revolut.hometask.it.core.SpecificationIT;
 import com.chriniko.revolut.hometask.it.core.TestInfraException;
@@ -17,6 +18,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ForkJoinPool;
@@ -35,7 +38,7 @@ public class AccountCreationRouteIT extends SpecificationIT implements AccountGe
     public void create_account_normal_case() throws Exception {
 
         // given
-        CreateAccountRequest createAccount = createSampleAccountRequest();
+        ModifyAccountRequest createAccount = createSampleAccountRequest();
         String payload = objectMapper.writeValueAsString(createAccount);
 
         RequestBody requestBody = RequestBody.create(null, payload);
@@ -45,7 +48,7 @@ public class AccountCreationRouteIT extends SpecificationIT implements AccountGe
         Response createAccountResponse = httpClient.newCall(createAccountRequest).execute();
 
         // then
-        assertEquals(200, createAccountResponse.code());
+        assertEquals(201, createAccountResponse.code());
 
         Request findAllAccountsRequest = new Request.Builder().url(baseUrl + "/accounts").build();
         Response findAllAccountsResponse = httpClient.newCall(findAllAccountsRequest).execute();
@@ -64,6 +67,41 @@ public class AccountCreationRouteIT extends SpecificationIT implements AccountGe
         //clean up
         createAccountResponse.close();
         findAllAccountsResponse.close();
+    }
+
+    @Test
+    public void create_account_validation_case() throws Exception {
+
+        // given
+        ModifyAccountRequest createAccount = createSampleAccountRequest();
+        createAccount.getName().setFirst(null);
+        createAccount.getAddress().setCity(null);
+
+
+        String payload = objectMapper.writeValueAsString(createAccount);
+
+        RequestBody requestBody = RequestBody.create(null, payload);
+        Request createAccountRequest = new Request.Builder().post(requestBody).url(baseUrl + "/accounts").build();
+
+        // when
+        Response createAccountResponse = httpClient.newCall(createAccountRequest).execute();
+
+        // then
+        assertEquals(400, createAccountResponse.code());
+
+        String actual = createAccountResponse.body().string();
+
+        ErrorDetails errorDetails = objectMapper.readValue(actual, ErrorDetails.class);
+        List<String> messages = errorDetails.getMessages();
+
+        assertEquals(
+                new HashSet<>(Arrays.asList(
+                        "address.city -> must not be empty",
+                        "name.first -> must not be empty")),
+                new HashSet<>(messages)
+        );
+
+        createAccountResponse.close();
     }
 
     @Test
@@ -129,7 +167,7 @@ public class AccountCreationRouteIT extends SpecificationIT implements AccountGe
 
             this.task = () -> {
 
-                CreateAccountRequest sampleAccountRequest = createSampleAccountRequest(faker);
+                ModifyAccountRequest sampleAccountRequest = createSampleAccountRequest(faker);
                 String payload = null;
                 try {
                     payload = objectMapper.writeValueAsString(sampleAccountRequest);
@@ -143,7 +181,7 @@ public class AccountCreationRouteIT extends SpecificationIT implements AccountGe
                 for (int i = 1; i <= accountsCreationPerClient; i++) {
                     try {
                         Response createAccountResponse = httpClient.newCall(createAccountRequest).execute();
-                        assertEquals(200, createAccountResponse.code());
+                        assertEquals(201, createAccountResponse.code());
                         createAccountResponse.close();
 
                     } catch (IOException e) {

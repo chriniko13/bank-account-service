@@ -1,0 +1,5 @@
+{
+  "timestamp": "2019-08-06T22:41:24.200Z",
+  "message": "Account with id: 1 modified since your last view, fetch it again to see the changes or not provide value for header->ETag, in order to force write lock",
+  "details": "/accounts/1"
+}

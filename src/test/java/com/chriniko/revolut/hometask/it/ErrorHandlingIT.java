@@ -24,9 +24,9 @@ public class ErrorHandlingIT extends SpecificationIT {
             // then
             String payloadAsString = response.body().string();
 
-            String expected = FileSupport.read("test/response/error_handling_processing_case.json");
+            String expected = FileSupport.read("test/response/error/error_handling_processing_case.json");
 
-            JSONAssert.assertEquals(payloadAsString, expected, new CustomComparator(JSONCompareMode.STRICT, new Customization("timestamp", (o1, o2) -> true)));
+            JSONAssert.assertEquals(expected, payloadAsString, new CustomComparator(JSONCompareMode.STRICT, new Customization("timestamp", (o1, o2) -> true)));
         }
 
     }
@@ -43,9 +43,9 @@ public class ErrorHandlingIT extends SpecificationIT {
             // then
             String payloadAsString = response.body().string();
 
-            String expected = FileSupport.read("test/response/error_handling_validation_case.json");
+            String expected = FileSupport.read("test/response/error/error_handling_validation_case.json");
 
-            JSONAssert.assertEquals(payloadAsString, expected, new CustomComparator(JSONCompareMode.STRICT, new Customization("timestamp", (o1, o2) -> true)));
+            JSONAssert.assertEquals(expected, payloadAsString, new CustomComparator(JSONCompareMode.STRICT, new Customization("timestamp", (o1, o2) -> true)));
         }
 
     }
@@ -62,9 +62,9 @@ public class ErrorHandlingIT extends SpecificationIT {
             // then
             String payloadAsString = response.body().string();
 
-            String expected = FileSupport.read("test/response/error_handling_unknown_case.json");
+            String expected = FileSupport.read("test/response/error/error_handling_unknown_case.json");
 
-            JSONAssert.assertEquals(payloadAsString, expected, new CustomComparator(JSONCompareMode.STRICT, new Customization("timestamp", (o1, o2) -> true)));
+            JSONAssert.assertEquals(expected, payloadAsString, new CustomComparator(JSONCompareMode.STRICT, new Customization("timestamp", (o1, o2) -> true)));
         }
 
     }

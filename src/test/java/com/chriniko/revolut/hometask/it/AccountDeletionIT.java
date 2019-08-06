@@ -1,14 +1,14 @@
 package com.chriniko.revolut.hometask.it;
 
-import com.chriniko.revolut.hometask.account.dto.CreateAccountRequest;
+import com.chriniko.revolut.hometask.account.dto.ModifyAccountRequest;
 import com.chriniko.revolut.hometask.account.repository.AccountRepository;
 import com.chriniko.revolut.hometask.it.core.AccountGenerator;
+import com.chriniko.revolut.hometask.it.core.CdiHelper;
 import com.chriniko.revolut.hometask.it.core.FileSupport;
 import com.chriniko.revolut.hometask.it.core.SpecificationIT;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.jboss.weld.proxy.WeldClientProxy;
 import org.joor.Reflect;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +24,7 @@ import java.util.concurrent.locks.StampedLock;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class AccountDeletionIT extends SpecificationIT implements AccountGenerator {
+public class AccountDeletionIT extends SpecificationIT implements AccountGenerator, CdiHelper {
 
     @Before
     public void setup() {
@@ -35,7 +35,7 @@ public class AccountDeletionIT extends SpecificationIT implements AccountGenerat
     public void delete_account_normal_case() throws Exception {
 
         // given
-        CreateAccountRequest createAccount = createSampleAccountRequest();
+        ModifyAccountRequest createAccount = createSampleAccountRequest();
         String payload = objectMapper.writeValueAsString(createAccount);
 
         RequestBody requestBody = RequestBody.create(null, payload);
@@ -43,7 +43,7 @@ public class AccountDeletionIT extends SpecificationIT implements AccountGenerat
 
         Response createAccountResponse = httpClient.newCall(createAccountRequest).execute();
 
-        assertEquals(200, createAccountResponse.code());
+        assertEquals(201, createAccountResponse.code());
         createAccountResponse.close();
 
 
@@ -57,7 +57,7 @@ public class AccountDeletionIT extends SpecificationIT implements AccountGenerat
 
         String actual = deleteAccountByIdResponse.body().string();
 
-        String expected = FileSupport.read("test/response/account_deletion_normal_case.json");
+        String expected = FileSupport.read("test/response/delete/account_deletion_normal_case.json");
 
         JSONAssert.assertEquals(
                 expected, actual,
@@ -84,7 +84,7 @@ public class AccountDeletionIT extends SpecificationIT implements AccountGenerat
 
         String actualAsString = findByIdAccountResponse.body().string();
 
-        String expected = FileSupport.read("test/response/account_deletion_not_exists_case.json");
+        String expected = FileSupport.read("test/response/delete/account_deletion_not_exists_case.json");
 
         JSONAssert.assertEquals(
                 expected, actualAsString, new CustomComparator(JSONCompareMode.STRICT, new Customization("timestamp", (o1, o2) -> true)));
@@ -99,7 +99,7 @@ public class AccountDeletionIT extends SpecificationIT implements AccountGenerat
     public void delete_account_acquire_write_lock_failure_case() throws Exception {
 
         // given
-        CreateAccountRequest createAccount = createSampleAccountRequest();
+        ModifyAccountRequest createAccount = createSampleAccountRequest();
         String payload = objectMapper.writeValueAsString(createAccount);
 
         RequestBody requestBody = RequestBody.create(null, payload);
@@ -107,7 +107,7 @@ public class AccountDeletionIT extends SpecificationIT implements AccountGenerat
 
         Response createAccountResponse = httpClient.newCall(createAccountRequest).execute();
 
-        assertEquals(200, createAccountResponse.code());
+        assertEquals(201, createAccountResponse.code());
         createAccountResponse.close();
 
         long justCreatedId = 1;
@@ -117,9 +117,7 @@ public class AccountDeletionIT extends SpecificationIT implements AccountGenerat
 
         Thread slowOperationOnJustCreatedAccount = new Thread(() -> {
 
-            //TODO extract to method test helper...
-            AccountRepository accountRepositoryNotProxied
-                    = (AccountRepository) ((WeldClientProxy) accountRepository).getMetadata().getContextualInstance();
+            AccountRepository accountRepositoryNotProxied = getNonProxiedObject(accountRepository);
 
             ConcurrentHashMap<Long, StampedLock> stampedLocksById
                     = Reflect.on(accountRepositoryNotProxied).field("stampedLocksById").get();
@@ -135,28 +133,31 @@ public class AccountDeletionIT extends SpecificationIT implements AccountGenerat
                 } catch (InterruptedException ignored) {
                 }
 
-            }finally {
+            } finally {
                 stampedLock.unlock(stamp);
             }
-
         });
         slowOperationOnJustCreatedAccount.start();
 
         slowOperationAcquiredWriteLockLatch.await();
 
-        Request deleteAccountByIdRequest = new Request.Builder().delete().url(baseUrl + "/accounts/"+justCreatedId).build();
+        Request deleteAccountByIdRequest = new Request.Builder().delete().url(baseUrl + "/accounts/" + justCreatedId).build();
         Response deleteAccountByIdResponse = httpClient.newCall(deleteAccountByIdRequest).execute();
 
 
         // then
-        assertEquals(200, deleteAccountByIdResponse.code());
+        assertEquals(503, deleteAccountByIdResponse.code());
 
+        String actual = deleteAccountByIdResponse.body().string();
+        String expected = FileSupport.read("test/response/delete/account_deletion_could_not_acquire_lock_case.json");
+
+        JSONAssert.assertEquals(
+                expected, actual,
+                new CustomComparator(JSONCompareMode.STRICT, new Customization("timestamp", (o1, o2) -> true))
+        );
 
         // clean up
         deleteAccountByIdResponse.close();
     }
-
-
-    // TODO normal delete (acquire write lock) and second worker/thread tries to update but deleted...
 
 }
