@@ -5,7 +5,7 @@
 
 
 
-#### Build Jar and Run Jar
+#### Build Jar and Run
 * Execute: `mvn clean package`
 
 * Then execute: `java -jar target/revolut-home-task-1.0-SNAPSHOT.jar`
@@ -45,3 +45,10 @@
 ##### Operational
 * Health-check endpoint
 * JMX registration of accounts in memory map
+
+
+
+<hr>
+
+#### Possible Alternatives
+Instead of using StampedLock, we could use: `https://github.com/pveentjer/Multiverse`
