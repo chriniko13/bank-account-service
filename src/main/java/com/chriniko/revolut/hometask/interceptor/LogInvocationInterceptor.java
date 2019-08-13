@@ -14,7 +14,7 @@ public class LogInvocationInterceptor {
 
     @AroundInvoke
     public Object logMethodEntry(InvocationContext ctx) throws Exception {
-        log.trace("Entering method: " + ctx.getMethod().getName());
+        //log.trace("Entering method: " + ctx.getMethod().getName());
         return ctx.proceed();
     }
 
