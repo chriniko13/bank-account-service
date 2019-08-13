@@ -1,9 +1,11 @@
 package com.chriniko.revolut.hometask.account.entity;
 
 import com.chriniko.revolut.hometask.account.dto.AddressDto;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class Address {
 
     private String name;

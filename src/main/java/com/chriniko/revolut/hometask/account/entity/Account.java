@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.LinkedList;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = false)
 @Data
+@NoArgsConstructor
 public class Account extends IdentifiableLong {
 
     private Long id;
@@ -37,6 +39,11 @@ public class Account extends IdentifiableLong {
     private Instant updated;
 
     private long optimisticReadStamp;
+
+    public Account(Name name, Address address) {
+        this.name = name;
+        this.address = address;
+    }
 
     public Account(NameDto nameDto, AddressDto addressDto) {
         this.name = new Name(nameDto);
