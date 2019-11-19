@@ -19,6 +19,7 @@ public abstract class TransactionalRepository<E extends IdentifiableLong> {
 
     private static final int ACQUIRE_WRITE_LOCK_TIMEOUT_IN_SECS = 3;
     private static final int ACQUIRE_READ_LOCK_TIMEOUT_IN_SECS = 5;
+    private static final int RETRY_COUNT = 5;
 
     /**
      * Due to the fact that {@link java.util.concurrent.ConcurrentHashMap#compute} (lock stripping technique) operation says the following in the javadoc:
@@ -109,11 +110,13 @@ public abstract class TransactionalRepository<E extends IdentifiableLong> {
         long accountId = entity.getId();
         StampedLock stampedLock = findStampedLock(entity);
 
-        long readStamp = tryAcquireReadLock(stampedLock, accountId);
+        Pair<Long, Boolean> readStamp = tryAcquireReadLock(stampedLock, accountId);
         try {
             return s.get();
         } finally {
-            stampedLock.unlock(readStamp);
+            if (!readStamp.getValue1() /*if it was not non-pessimistic read, then unlock*/) {
+                stampedLock.unlock(readStamp.getValue0());
+            }
         }
     }
 
@@ -133,13 +136,23 @@ public abstract class TransactionalRepository<E extends IdentifiableLong> {
         }
     }
 
-    private long tryAcquireReadLock(StampedLock stampedLock, long accountId) {
+    private Pair<Long, Boolean /*Note: true -> if performed non-pessimistic read lock.*/> tryAcquireReadLock(StampedLock stampedLock, long accountId) {
+
+        // Note: first try optimistic read (non-pessimistic read lock). 90% of the cases.
+        for (int i = 0; i < RETRY_COUNT; i++) {
+            long optimisticReadStamp = stampedLock.tryOptimisticRead();
+            if (stampedLock.validate(optimisticReadStamp)) {
+                return Pair.with(optimisticReadStamp, true);
+            }
+        }
+
+        // Note: if we are here, we should downgrade to pessimistic read lock, it should be 10% of the cases.
         try {
             long readStamp = stampedLock.tryReadLock(ACQUIRE_READ_LOCK_TIMEOUT_IN_SECS, TimeUnit.SECONDS);
             if (readStamp == 0) {
                 throw new AcquireEntityLockFailureException(accountId, entityClass());
             }
-            return readStamp;
+            return Pair.with(readStamp, false);
 
         } catch (InterruptedException e) {
             if (!Thread.currentThread().isInterrupted()) {
